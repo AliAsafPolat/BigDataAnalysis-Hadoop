@@ -1,6 +1,8 @@
 
 import java.io.IOException;
 
+import java.util.List;
+import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -63,7 +65,7 @@ public class StandartDeviation {
 				tip = new Float(Float.parseFloat(rowList[tipAmountColumnId]));
 			}
 			catch(NumberFormatException e){
-				tip = 0.0;
+				tip = new Float(0);
 			}
 			
 			
