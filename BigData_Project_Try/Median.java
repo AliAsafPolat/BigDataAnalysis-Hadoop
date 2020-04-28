@@ -1,6 +1,7 @@
 
 import java.io.IOException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
@@ -84,7 +85,7 @@ public class Median {
 			
 			float median;
 			int halfSize;
-			List<Integer> valueList = new ArrayList<Integer>();
+			List<Float> valueList = new ArrayList<Float>();
 			
 			for (FloatWritable value : values) {
 				valueList.add(value.get());
