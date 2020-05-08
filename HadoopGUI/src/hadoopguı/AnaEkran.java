@@ -435,6 +435,7 @@ public class AnaEkran extends javax.swing.JFrame {
     
     private ArrayList<String> sonuclari_getir(){
         ArrayList<String> sonuclar = new ArrayList<String>();
+        
     try{
            
             String sonuc_file=last_output_path+"/part-r-00000"; 
@@ -502,8 +503,11 @@ public class AnaEkran extends javax.swing.JFrame {
     private void jButtonSonucMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSonucMouseClicked
         // TODO add your handling code here:
     ArrayList<String> sonuclar = sonuclari_getir();
+    ArrayList<String> yerler = csv_oku();
     for (String sonuc:sonuclar){
-        jTextAreaLog.append(sonuc+"\n");
+        String []buff = sonuc.split("\t");
+        //System.out.println(buff[0]);
+        jTextAreaLog.append(yerler.get(Integer.valueOf(buff[0]))+"\t"+buff[1]+"\n");
     }
     jButtonSonuc.setEnabled(false);
     }//GEN-LAST:event_jButtonSonucMouseClicked
