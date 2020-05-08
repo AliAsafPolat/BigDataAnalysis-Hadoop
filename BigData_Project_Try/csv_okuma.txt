@@ -1,0 +1,18 @@
+String row;
+		BufferedReader csvReader;
+		try {
+			csvReader = new BufferedReader(new FileReader("E:\\Eclipse\\Work-Place\\HadoopGUI\\src\\yer_kodlari.csv"));
+			try {
+				while ((row = csvReader.readLine()) != null) {
+				    String[] data = row.split(",");
+				    System.out.println(data[0]);
+				    // do something with the data
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
