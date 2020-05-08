@@ -248,7 +248,7 @@ public class AnaEkran extends javax.swing.JFrame {
                 System.out.println(line);
                 //jTextAreaLog.append(line+"\n");
             }
-            jTextAreaLog.append("Dosya sisteme yuklendi.");
+            jTextAreaLog.append("Dosya sisteme yuklendi.\n");
             
         }catch(Exception e){
             e.printStackTrace();
@@ -457,6 +457,26 @@ public class AnaEkran extends javax.swing.JFrame {
         return sonuclar;
     }
     
+    private void input_path_temizle(){
+        
+    try{ 
+            String []command = {"/home/hadoop/sh_dosyalari/input_path_sil.sh"};
+            ProcessBuilder pb = new ProcessBuilder(command);
+            Process p = pb.start();
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = null;
+            while((line = reader.readLine())!=null){
+                System.out.println(line);
+            }
+   
+        }catch(Exception e){
+            e.printStackTrace();
+            jTextAreaLog.append("Hata Oluştu! \n");
+        } 
+    
+    }
+    
     private void jButtonBaslatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonBaslatMouseClicked
         // TODO add your handling code here:
         String func = jComboBox_fonksiyonlar.getSelectedItem().toString();
@@ -469,10 +489,13 @@ public class AnaEkran extends javax.swing.JFrame {
         if(file_tam_path==null)
             JOptionPane.showMessageDialog(null, "Dosya Seçilmedi");
         else{
+            // input pathde yalnızca seçilen dosya olmasını sağlar.
+            input_path_temizle();
             System.out.println(file_tam_path);
             //jButtonSonuc.setEnabled(true);
             // Bu kısımda gerekli hadoop kodlarını çalıştıracağız.
-            //sisteme_yukle();
+            // Seçilen dosyayı sisteme yükler.
+            sisteme_yukle();
             
             switch(func){
                 case "Mean":
@@ -504,6 +527,7 @@ public class AnaEkran extends javax.swing.JFrame {
         // TODO add your handling code here:
     ArrayList<String> sonuclar = sonuclari_getir();
     ArrayList<String> yerler = csv_oku();
+    sonuclar.remove(sonuclar.size()-1);
     for (String sonuc:sonuclar){
         String []buff = sonuc.split("\t");
         //System.out.println(buff[0]);
