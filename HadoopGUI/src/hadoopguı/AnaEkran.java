@@ -195,7 +195,7 @@ public class AnaEkran extends javax.swing.JFrame {
                     .addComponent(jButtonSistemBaslat)
                     .addComponent(jButtonSistemDurdur))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -220,8 +220,7 @@ public class AnaEkran extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDosyaSecActionPerformed
 
     private void btnDosyaSecMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnDosyaSecMouseClicked
-        // TODO add your handling code here:
-        
+ 
         FileDialog dialog = new FileDialog((Frame)null, "Select File to Open");
         dialog.setMode(FileDialog.LOAD);
         dialog.setVisible(true);
@@ -231,12 +230,11 @@ public class AnaEkran extends javax.swing.JFrame {
         
         
         file_tam_path = dialog.getDirectory()+dialog.getFile();
-            
-        //System.out.print(file_tam_path);
+
     }//GEN-LAST:event_btnDosyaSecMouseClicked
     // Dosya seç ile seçilen dosyayı hdfs sistemine yukler.
     private void sisteme_yukle(){
-    
+            jTextAreaLog.append("Dosya sisteme yukleniyor...\n");
     try{
             String []command = {"/home/hadoop/sh_dosyalari/sisteme_yukle.sh",file_tam_path,hadoop_input_path};
             ProcessBuilder pb = new ProcessBuilder(command);
@@ -246,7 +244,6 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
             }
             jTextAreaLog.append("Dosya sisteme yuklendi.\n");
             
@@ -268,7 +265,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Daemonlar Baslatildi.\n");
             
@@ -291,7 +288,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Daemonlar Durduruldu.\n");
             
@@ -317,7 +314,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Mean fonksiyonu çalıştırıldı.\n");
             
@@ -343,7 +340,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Median fonksiyonu çalıştırıldı.\n");
             
@@ -369,7 +366,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Range fonksiyonu çalıştırıldı.\n");
             
@@ -395,7 +392,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Standart Dev. fonksiyonu çalıştırıldı.\n");
             
@@ -421,7 +418,7 @@ public class AnaEkran extends javax.swing.JFrame {
             String line = null;
             while((line = reader.readLine())!=null){
                 System.out.println(line);
-                //jTextAreaLog.append(line+"\n");
+                
             }
             jTextAreaLog.append("Summation fonksiyonu çalıştırıldı.\n");
             
@@ -480,10 +477,7 @@ public class AnaEkran extends javax.swing.JFrame {
     private void jButtonBaslatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonBaslatMouseClicked
         // TODO add your handling code here:
         String func = jComboBox_fonksiyonlar.getSelectedItem().toString();
-        System.out.println(func);
-        
-        // Bu şekilde fonksiyonların seçildiğini kontrol edebiliyoruz.
-        
+   
         // Eğer file seçilmemişse hata versin seçilmişse sisteme yuklesin
         // ve çalıştırsın.
         if(file_tam_path==null)
@@ -491,8 +485,7 @@ public class AnaEkran extends javax.swing.JFrame {
         else{
             // input pathde yalnızca seçilen dosya olmasını sağlar.
             input_path_temizle();
-            System.out.println(file_tam_path);
-            //jButtonSonuc.setEnabled(true);
+            
             // Bu kısımda gerekli hadoop kodlarını çalıştıracağız.
             // Seçilen dosyayı sisteme yükler.
             sisteme_yukle();
@@ -524,13 +517,13 @@ public class AnaEkran extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonBaslatMouseClicked
 
     private void jButtonSonucMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSonucMouseClicked
-        // TODO add your handling code here:
+        
     ArrayList<String> sonuclar = sonuclari_getir();
     ArrayList<String> yerler = csv_oku();
     sonuclar.remove(sonuclar.size()-1);
     for (String sonuc:sonuclar){
         String []buff = sonuc.split("\t");
-        //System.out.println(buff[0]);
+        
         jTextAreaLog.append(yerler.get(Integer.valueOf(buff[0]))+"\t"+buff[1]+"\n");
     }
     jButtonSonuc.setEnabled(false);
@@ -546,15 +539,14 @@ public class AnaEkran extends javax.swing.JFrame {
 				while ((row = csvReader.readLine()) != null) {
 				    String[] data = row.split(",");
 				    mekanlar.add(data[2]);
-                                    //System.out.println(data[2]);
-				    // do something with the data
+                                    
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
         return mekanlar;
@@ -568,8 +560,8 @@ public class AnaEkran extends javax.swing.JFrame {
 
     private void jButtonSistemDurdurMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonSistemDurdurMouseClicked
         jTextAreaLog.append("Sistem Durduruluyor...\n");
-        //daemon_durdur();    
-        ArrayList<String> oyl = csv_oku();
+        daemon_durdur();    
+        
     }//GEN-LAST:event_jButtonSistemDurdurMouseClicked
 
     private void jButtonSistemBaslatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSistemBaslatActionPerformed
@@ -579,7 +571,7 @@ public class AnaEkran extends javax.swing.JFrame {
     private void jButtonYardimMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonYardimMouseClicked
     YardimEkrani ekran = new YardimEkrani();
     ekran.setVisible(true);
-    // TODO add your handling code here:
+    
     }//GEN-LAST:event_jButtonYardimMouseClicked
 
     /**
