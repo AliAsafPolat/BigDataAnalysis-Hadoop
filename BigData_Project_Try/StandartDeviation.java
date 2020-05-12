@@ -38,73 +38,82 @@ public class StandartDeviation {
 		System.exit(j.waitForCompletion(true) ? 0 : 1);
 	}
 
+	// Farklı lokasyonlara giden yolcuların bıraktığı bahşiş miktarlarının standart sapmasını bulma
 	public static class MapStandartDeviation extends Mapper<LongWritable, Text, Text, FloatWritable> {
+		private final int kolon_sayisi = 18; 			// veriset içerisindeki toplam kolon sayısı
+		private final int lokasyon_kolon_id = 8;
+		private final int bahsis_miktari_kolon_id = 13; // key,value ikilisine denk gelen kolon numaraları
+		private Text lokasyon_id = new Text(); 			// key - lokasyon 
+		private static FloatWritable ta; 				// value - bahşiş (tip amount)
 
-		private final int numOfCols = 18;
-		private final int  locationColumnId = 8, tipAmountColumnId = 13;
-		private Text locationId = new Text(); // key 
-		private static FloatWritable ta; // value     bahşiş 
+		// .csv dosyası içerisindeki bir satırı alır ve kolon sırasına göre diziye atıp döndürür.
+		private String[] satirListele(String satir, int kolonSayisi) {
 
-		private String[] lineToList(String line, int num_of_cols) {
-			
-			String[] list = new String[num_of_cols];
-
-			line = line.substring(0, line.length() - 1);
-			list = line.split(",");
-
+			String[] list = new String[kolonSayisi];
+			satir = satir.substring(0, satir.length() - 1);
+			list = satir.split(",");
 			return list;
 		}
 
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+			String[] satirListesi = satirListele(value.toString(), kolon_sayisi);
 
-			String[] rowList = lineToList(value.toString(), numOfCols);
-			String locId = rowList[locationColumnId];
-			Float tip;
-			
-			try{ 
-				tip = new Float(Float.parseFloat(rowList[tipAmountColumnId]));
+			// Verisetinden lokasyon id bilgisinin değişkene atanması.
+			String locId = satirListesi[lokasyon_kolon_id]; 
+
+			Float bahsis; 		// Bahşiş miktarının tutulacağı değişken.
+
+			try{
+				// Verisetinde String olarak verilen bahşiş değerleri Float olarak dönüştürülür.
+				bahsis = new Float(Float.parseFloat(satirListesi[bahsis_miktari_kolon_id]));
 			}
 			catch(NumberFormatException e){
-				tip = new Float(0);
+				bahsis = new Float(0);
 			}
-			
-			
-			ta = new FloatWritable(tip);
-			
-			locationId.set(locId);
-			context.write(locationId,ta);
-			
-			
-		}
 
+			// Bahşiş değeri FloatWritable olarak dönüştürüldü.
+			ta = new FloatWritable(bahsis);		
+
+			// key değeri olarak lokasyon id atanır.
+			lokasyon_id.set(locId);
+
+			// Elde edilen değerler context üzerine yazılır.
+			context.write(lokasyon_id,ta); 		
+		}
 	}
+
+
 
 	public static class ReduceStandartDeviation extends Reducer<Text, FloatWritable, Text, FloatWritable> {
-		public void reduce(Text locationId, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {
+		public void reduce(Text lokasyon_id, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {
 			List<Float> valueList = new ArrayList<>();
-			int count = 0;
-			float sum = 0, mean = 0;
-			float sumOfSquares = 0;
-			float stdDev = 0;
+			int count = 0; 				// Toplam eleman sayısını tutan değişken.
+			float sum = 0, mean = 0; 	// Toplam ve ortalama değerlerini tutan değişken.
+			float sumOfSquares = 0; 	// Kareler toplamı değerini tutan değişken.
+			float stdDev = 0; 			// Standart sapma değerini tutan değişken.
 
 			for (FloatWritable value : values) {
-				sum += value.get();
-				count++;
-				valueList.add(value.get());
+				sum += value.get(); 		// Toplamlar bulunur.
+				count++; 					// Eleman sayısı arttırılır.
+				valueList.add(value.get()); // Listeye eklenir.
 			}
-			mean = sum / count;
+
+			mean = sum / count; 			// Ortalama hesaplanır.
+
 			for (float value : valueList) {
-				sumOfSquares += (value - mean) * (value - mean);
+				// Kareler toplamı bulunur.
+				sumOfSquares += (value - mean) * (value - mean);  
 			}
-			if(count == 1)
+			if(count == 1) // Eğer 1 eleman varsa standart sapmanın doğru hesaplanması için count 1 arttılır.
 				count++;
-			
+
+			// Standart sapma değeri bulunur.
 			stdDev = (float) Math.sqrt(sumOfSquares / (count - 1));
-			con.write(locationId, new FloatWritable(stdDev));
+
+			// Elde edilen değerler context üzerine yazılır.
+			con.write(lokasyon_id, new FloatWritable(stdDev)); 
 		}
 	}
-	
-	
 	
 	
 	
