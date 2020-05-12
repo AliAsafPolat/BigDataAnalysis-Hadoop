@@ -16,7 +16,6 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 public class Mean {
 	
-	min max = 0
 
 	public static void main(String[] args) throws Exception {
 		
