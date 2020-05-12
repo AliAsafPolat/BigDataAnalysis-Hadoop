@@ -33,57 +33,69 @@ public class Summation {
 		System.exit(j.waitForCompletion(true) ? 0 : 1);
 	}
 
+	// Belirli bir lokasyona seyahat eden yolcu sayısını bulma.
 	public static class MapSummation extends Mapper<LongWritable, Text, Text, IntWritable> {
+		private final int kolon_sayisi = 18; 		// Veriset içerisindeki toplam kolon sayısı.
+		private Text lokasyon_id = new Text(); 		// key - lokasyon id
+		private static IntWritable pc; 				// value - yolcu sayısı (passenger count)
 
-		private final int numOfCols = 18; // kolon sayısı   // locationColumnID = 8 , passengersColumnId = 9
-		private Text locationId = new Text(); // key 
-		private final int locationColumnId = 8;
-		private final int passengerCountColumnId = 3;
-		private static IntWritable pc; // value     passeng count 
+		private final int lokasyon_kolon_id = 8; 	// key'e (lokasyon id) denk gelen kolon numarası
+		private final int yolcu_sayisi_kolon_id = 3;// value'ya(yolcu sayısı) denk gelen kolon numarası
 
-		private String[] lineToList(String line, int num_of_cols) {
-			String[] list = new String[num_of_cols];
 
-			line = line.substring(0, line.length() - 1);
-			list = line.split(",");
+		// .csv dosyası içerisindeki bir satırı alır ve kolon sırasına göre diziye atıp döndürür.
+		private String[] satirListele(String satir, int kolonSayisi) {
 
+			String[] list = new String[kolonSayisi];
+			satir = satir.substring(0, satir.length() - 1);
+			list = satir.split(",");
 			return list;
 		}
-		
+
+
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-			
-            String[] rowList = lineToList(value.toString(), numOfCols);
-			String line = value.toString();
-			String locId = rowList[locationColumnId];
-			Integer passengCount;
-			
+			// Veri setindeki bir satırı alır.		
+			String[] satirListesi = satirListele(value.toString(), kolon_sayisi);
+			String satir = value.toString();
+
+			// Verisetinden lokasyon id bilgisinin değişkene atanması.
+			String locId = satirListesi[lokasyon_kolon_id]; 
+
+			Integer yolcuSayisi; 	// Yolcu sayısını tutan değişken
+
 			try{
-				passengCount = new Integer(Integer.parseInt(rowList[passengerCountColumnId])); 
+				// Verisetinde string olarak tutulan yolcu sayısı integer değerine cast edilir.
+				yolcuSayisi = new Integer(Integer.parseInt(satirListesi[yolcu_sayisi_kolon_id])); 
 			}
 			catch(NumberFormatException e){
-				passengCount = 0;
+				yolcuSayisi = 0;
 			}
-			 
-			pc = new IntWritable(passengCount);
-			
-			locationId.set(locId);
-			context.write(locationId,pc);
-			
-		
-        }		
 
+			// Yolcu sayisi IntWritable olarak dönüştürülür.
+			pc = new IntWritable(yolcuSayisi);
+
+			// key değeri olarak lokasyon id atanır.
+			lokasyon_id.set(locId);
+
+			// key - value değerleri alınır ve context üzerine yazılır.
+			context.write(lokasyon_id,pc); 
+		}		
 	}
-					
-	public static class ReduceSummation extends Reducer<Text, IntWritable, Text, IntWritable> {
-							
-		public void reduce(Text locationId, Iterable<IntWritable> values, Context con) throws IOException, InterruptedException {
-			int sum = 0;
+
+
+	public static class ReduceSummation extends Reducer<Text, IntWritable, Text, IntWritable> {							
+
+		public void reduce(Text lokasyon_id, Iterable<IntWritable> values, Context con) throws IOException, InterruptedException {
+
+			int sum = 0; 	// Toplamın tutulacağı değişken
 
 			for (IntWritable value : values) {
-				sum += value.get();
-			}
-			
-			con.write(locationId, new IntWritable(sum));
+				sum += value.get();		// Toplam hesaplanır.
+			}		
+
+			// Hesaplanan toplam değer key - value şeklinde context üzerine yazılır.
+			con.write(lokasyon_id, new IntWritable(sum));
+
 		}
 	}
 }
