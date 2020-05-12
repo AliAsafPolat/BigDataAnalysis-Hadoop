@@ -477,7 +477,6 @@ public class AnaEkran extends javax.swing.JFrame {
     private void jButtonBaslatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonBaslatMouseClicked
         // TODO add your handling code here:
         String func = jComboBox_fonksiyonlar.getSelectedItem().toString();
-   
         // Eğer file seçilmemişse hata versin seçilmişse sisteme yuklesin
         // ve çalıştırsın.
         if(file_tam_path==null)
@@ -521,10 +520,18 @@ public class AnaEkran extends javax.swing.JFrame {
     ArrayList<String> sonuclar = sonuclari_getir();
     ArrayList<String> yerler = csv_oku();
     sonuclar.remove(sonuclar.size()-1);
+    
+    String func = jComboBox_fonksiyonlar.getSelectedItem().toString();
+    String ek;
+    if(func.compareTo("Summation")==0)
+        ek = " kisi";
+    else
+        ek = " $";
+    
     for (String sonuc:sonuclar){
         String []buff = sonuc.split("\t");
         
-        jTextAreaLog.append(yerler.get(Integer.valueOf(buff[0]))+"\t"+buff[1]+"\n");
+        jTextAreaLog.append(yerler.get(Integer.valueOf(buff[0]))+"\t"+buff[1]+ek+"\n");
     }
     jButtonSonuc.setEnabled(false);
     }//GEN-LAST:event_jButtonSonucMouseClicked
