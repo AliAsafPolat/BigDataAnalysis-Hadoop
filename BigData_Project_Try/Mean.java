@@ -73,7 +73,7 @@ public class Mean {
 				ucret = new Float(Float.parseFloat(satirListesi[ucret_kolon_id])); 
 			}
 			catch(NumberFormatException e){
-				ucret = 0.0;
+				ucret = new Float(0);
 			}
 			// Elde edilen sonuç FloatWritable şekline çevrilir.
 			fa = new FloatWritable(ucret);
