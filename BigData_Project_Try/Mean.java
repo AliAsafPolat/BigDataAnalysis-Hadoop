@@ -37,58 +37,74 @@ public class Mean {
 		System.exit(j.waitForCompletion(true) ? 0 : 1);
 	}
 
-	public static class MapMean extends Mapper<LongWritable, Text, Text, FloatWritable> {
+	
+	// Belirli bir lokasyona giderken ödenen ortalama ücreti bulma
+	public static class MapMean extends Mapper<LongWritable, Text, Text, FloatWritable> { 
 
-		private final int numOfCols = 18;
-		private final int  locationColumnId = 8, fareAmountColumnId = 10;
-		private Text locationId = new Text(); // key 
-		private static FloatWritable fa; // value     hesap 
+		private final int kolon_sayisi = 18; 		// Veriset içerisindeki toplam kolon sayısı
+		private final int lokasyon_kolon_id = 8;	// Datasette key,value ikilisine denk gelen kolon numaraları
+		private final int ucret_kolon_id = 10; 
+		private Text lokasyon_id = new Text(); 		// key 	 - lokasyon id
+		private static FloatWritable fa; 		// value - ücret  (fare amount)   
 
-		private String[] lineToList(String line, int num_of_cols) {
-			
-			String[] list = new String[num_of_cols];
+		// .csv dosyası içerisindeki bir satırı alır ve kolon sırasına göre diziye atıp döndürür.
+		private String[] satirListele(String satir, int kolonSayisi) {
 
-			line = line.substring(0, line.length() - 1);
-			list = line.split(",");
+			String[] list = new String[kolonSayisi];
 
+			satir = satir.substring(0, satir.length() - 1);
+			list = satir.split(",");
 			return list;
 		}
 
+
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-			String[] rowList = lineToList(value.toString(), numOfCols);
-			String locId = rowList[locationColumnId];
-			Float fare;
-			
+			// Veri setindeki bir satırı alır.
+			String[] satirListesi = satirListele(value.toString(), kolon_sayisi);
+
+			// Verisetindeki lokasyon id bilgisi değişkene atanır.
+			String locId = satirListesi[lokasyon_kolon_id]; 
+
+
+			Float ucret; // Ücretin tutulacağı değişken.
+
 			try{ 
-				fare = new Float(Float.parseFloat(rowList[fareAmountColumnId]));
+				// Verisetinden string olarak okunan ücret float değerine cast edilir.
+				ucret = new Float(Float.parseFloat(satirListesi[ucret_kolon_id])); 
 			}
 			catch(NumberFormatException e){
-				fare = 0.0;
+				ucret = 0.0;
 			}
-			
-			
-			fa = new FloatWritable(fare);
-			
-			locationId.set(locId);
-			context.write(locationId,fa);
-			
-			
+			// Elde edilen sonuç FloatWritable şekline çevrilir.
+			fa = new FloatWritable(ucret);
+
+			// Key değeri olarak lokasyon id bilgisi atanır.
+			lokasyon_id.set(locId);
+
+			// Elde edilen key - value pairleri context üzerine yazılır.
+			context.write(lokasyon_id,fa); 	
 		}
 
 	}
 
+
+
+
 	public static class ReduceMean extends Reducer<Text, FloatWritable, Text, FloatWritable> {
 
-		public void reduce(Text locationId, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {
+		// Key değeri olarak lokasyon_id kullanılır.
+		public void reduce(Text lokasyon_id, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {
 			float sum = 0, mean = 0;
 			int count = 0;
 			for (FloatWritable value : values) {
-				sum += value.get();
-				count++;
+				sum += value.get(); // Toplamın tutulduğu değişken.
+				count++;  	    // Değer sayısının tutulduğu değişken.
 			}
-			mean = sum / count;
-			con.write(locationId, new FloatWritable(mean));
+			mean = sum / count; 	    // Ortalamanın hesaplanması.
+
+			// Reduce işleminden sonra değerler context üzerine yazılır. 
+			con.write(lokasyon_id, new FloatWritable(mean)); 
 		}
 	}
 }
