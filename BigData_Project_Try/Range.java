@@ -38,68 +38,69 @@ public class Range {
 		System.exit(j.waitForCompletion(true) ? 0 : 1);
 	}
 
+	// Belirli lokasyonlarda bırakılan bahşiş aralığını bulma.
 	public static class MapRange extends Mapper<LongWritable, Text, Text, FloatWritable> {
+		private final int kolon_sayisi = 18; 			// Veriset içerisindeki toplam kolon sayısı.
+		private final int lokasyon_kolon_id = 8;
+		private final int bahsis_miktari_kolon_id = 13; // key,value ikilisine denk gelen kolon numaraları
+		private Text lokasyon_id = new Text(); 			// key - lokasyon 
+		private static FloatWritable ta; 				// value - bahşiş (tip amount)
 
-		private final int numOfCols = 18;
-		private final int  locationColumnId = 8, tipAmountColumnId = 13;
-		private Text locationId = new Text(); // key 
-		private static FloatWritable ta; // value     bahşiş 
+		// .csv dosyası içerisindeki bir satırı alır ve kolon sırasına göre diziye atıp döndürür.
+		private String[] satirListele(String satir, int kolonSayisi) {
 
-		private String[] lineToList(String line, int num_of_cols) {
-			
-			String[] list = new String[num_of_cols];
-
-			line = line.substring(0, line.length() - 1);
-			list = line.split(",");
-
+			String[] list = new String[kolonSayisi];
+			satir = satir.substring(0, satir.length() - 1);
+			list = satir.split(",");
 			return list;
 		}
 
+
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-			String[] rowList = lineToList(value.toString(), numOfCols);
-			String locId = rowList[locationColumnId];
-			Float tip;
-			
-			try{ 
-				tip = new Float(Float.parseFloat(rowList[tipAmountColumnId]));
+			String[] satirListesi = satirListele(value.toString(), kolon_sayisi);
+
+			// Verisetinden lokasyon id bilgisinin değişkene atanması
+			String locId = satirListesi[lokasyon_kolon_id]; 
+
+			Float bahsis; // bahşiş miktarının tutulacağı değişken
+
+			try{
+				// Verisetinde String olarak tutulan bahşiş değeri Float olarak dönüştürüldü.
+				bahsis = new Float(Float.parseFloat(satirListesi[bahsis_miktari_kolon_id]));
 			}
 			catch(NumberFormatException e){
-				tip = new Float(0);
+				bahsis = new Float(0);
 			}
-			
-			
-			ta = new FloatWritable(tip);
-			
-			locationId.set(locId);
-			context.write(locationId,ta);
-			
-			
+			// Elde edilen bahşiş değeri FloatWritable olarak dönüştürüldü.		
+			ta = new FloatWritable(bahsis);		
+
+			// key değeri olarak lokasyon id atandı.
+			lokasyon_id.set(locId);
+
+			// Elde edilen key - value değerleri context üzerine yazıldı.
+			context.write(lokasyon_id,ta); 
 		}
 
 	}
 
-	public static class ReduceRange extends Reducer<Text, FloatWritable, Text, FloatWritable> {
-		public void reduce(Text locationId, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {
-			
-			float minVal, maxVal, range;
 
+	public static class ReduceRange extends Reducer<Text, FloatWritable, Text, FloatWritable> {
+		public void reduce(Text lokasyon_id, Iterable<FloatWritable> values, Context con) throws IOException, InterruptedException {		
+			float minVal, maxVal, range; // max,min, range değişkenleri
 			maxVal = 0;
 			minVal = 1000;
 			for (FloatWritable value : values) {
 				if (value.get() > maxVal)
-					maxVal = value.get();
+					maxVal = value.get(); // max değer bulunur
 				if (value.get() < minVal)
-					minVal = value.get();
+					minVal = value.get(); // min değer bulunur
 			}
-
-			range = maxVal - minVal;
-			con.write(locationId, new FloatWritable(range));
-			
-			
-			
+			range = maxVal - minVal; // max ve min arasındaki fark yani range bulunur
+			con.write(lokasyon_id, new FloatWritable(range)); // key - value ikilisinin yazılması	
 		}
 	}
+
 	
 	
 	
